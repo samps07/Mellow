@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mellow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script>
+      // Configure Tailwind for dark mode
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              gray: {
+                850: '#182030',
+                950: '#0b0f1a',
+              },
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        /* Basic styling */
+        body { background-color: #0b0f1a; color: #cbd5e1; }
+        /* Style for HTMX loading indicators */
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+        .htmx-request.htmx-indicator { display: inline-block; }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <div x-data="{ 
+            showCreate: false, 
+            showDelete: false, 
+            showTokenModal: false, 
+            lastToken: '', 
+            lastPostId: '' 
+        }"
+         @show-token.window="
+            showTokenModal = true; 
+            lastToken = $event.detail.token; 
+            lastPostId = $event.detail.post_id;
+            showCreate = false;
+         "
+         class="container mx-auto max-w-3xl px-4 py-8"
+    >
+
+        <header class="text-center mb-6">
+            <h1 class="text-5xl font-bold text-white mb-0">Mellow</h1>
+            <p class="text-sm text-slate-400 mt-1">A Privacy-Focused, AI-Enhanced Discussion Board</p>
+        </header>
+
+        <div class="flex justify-between items-center mb-4">
+            <button @click="showCreate = !showCreate; showDelete = false"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                Create Post ➕
+            </button>
+            <button @click="showDelete = !showDelete; showCreate = false"
+                    class="bg-gray-700 hover:bg-gray-600 text-slate-300 font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                Delete Post 🗑️
+            </button>
+        </div>
+
+        <div x-show="showTokenModal" x-transition 
+             class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div class_ ="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full border border-gray-700">
+                <h3 class="text-lg font-bold text-green-400">✅ Post created anonymously!</h3>
+                <p class="text-yellow-400 font-semibold my-3">🔒 IMPORTANT: Save your deletion token. It is shown only ONCE!</p>
+                <div class="bg-gray-900 p-3 rounded-md font-mono text-slate-300 text-sm border border-gray-700">
+                    <p>Post ID: <span class="font-bold text-white" x-text="lastPostId"></span></p>
+                    <p>Token: <span class="font-bold text-white" x-text="lastToken"></span></p>
+                </div>
+                <button @click="showTokenModal = false; lastToken = ''; lastPostId = ''"
+                        class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    I have saved my token
+                </button>
+            </div>
+        </div>
+
+        <div x-show="showCreate" x-transition class="mb-6">
+            <form hx-post="/posts"
+                  hx-target="#post-list"
+                  hx-swap="afterbegin"
+                  hx-indicator="#create-spinner"
+                  @submit.window="showCreate = false; document.getElementById('form-error').innerHTML = '';"
+                  class="bg-gray-850 p-4 rounded-lg border border-gray-700">
+                
+                <h3 class="text-xl font-semibold text-white mb-3">✍️ Create New Post</h3>
+                <div id="form-error" class="mb-2"></div> <input type="text" name="title" placeholder="Title (optional)"
+                       class="w-full p-2 mb-3 bg-gray-900 border border-gray-700 rounded-md text-slate-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <textarea name="body" rows="5" placeholder="Share your tip, question, or experience..." required
+                          class="w-full p-2 mb-3 bg-gray-900 border border-gray-700 rounded-md text-slate-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                        <input type="checkbox" name="use_geminify" value="true"
+                               class="form-checkbox h-4 w-4 bg-gray-900 border-gray-600 text-blue-500 rounded focus:ring-blue-500">
+                        <span>✨ Auto-fix Grammar (Geminify)</span>
+                    </label>
+                    <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                        Post Anonymously
+                        <span id="create-spinner" class="htmx-indicator">🔄</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div x-show="showDelete" x-transition class="mb-6">
+            <form hx-post="/delete"
+                  hx-target="#delete-error-container"
+                  hx-swap="innerHTML"
+                  @submit.window="showDelete = false"
+                  class="bg-gray-850 p-4 rounded-lg border border-gray-700">
+                
+                <h3 class="text-xl font-semibold text-white mb-3">🗑️ Delete Your Post</h3>
+                <div id="delete-error-container" class="mb-2"></div> <input type="number" name="del_id" placeholder="Post ID" required
+                       class="w-full p-2 mb-3 bg-gray-900 border border-gray-700 rounded-md text-slate-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <input type="password" name="del_token" placeholder="Deletion Token" required
+                       class="w-full p-2 mb-3 bg-gray-900 border border-gray-700 rounded-md text-slate-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 w-full">
+                    Confirm Deletion
+                </button>
+            </form>
+        </div>
+
+        <hr class="border-gray-700 my-6"/>
+        <form hx-post="/search" 
+              hx-target="#search-results" 
+              hx-swap="innerHTML"
+              hx-indicator="#search-spinner"
+              class="mb-4">
+            <div class="relative">
+                <input type="text" name="query" placeholder="Search posts by keyword or topic..."
+                       class="w-full p-3 pr-20 bg-gray-800 border border-gray-700 rounded-lg text-slate-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+                    Search 🔍
+                    <span id="search-spinner" class="htmx-indicator">...</span>
+                </button>
+            </div>
+        </form>
+
+        <div id="search-results" class="mb-6">
+            {% if search_results %}
+                {% include '_search_results.html' %}
+            {% endif %}
+        </div>
+
+        <hr class="border-gray-700 my-6"/>
+        <h2 class="text-2xl font-semibold text-white mb-4">💬 Recent Posts</h2>
+        
+        <div id="post-list" class="space-y-4">
+            {% if posts %}
+                {% for post in posts %}
+                    {% include '_post_card.html' %}
+                {% endfor %}
+            {% else %}
+                <p class="text-slate-400 text-center py-4">No posts have been created yet. Be the first! ☝️</p>
+            {% endif %}
+        </div>
+
+        <hr class="border-gray-700 mt-8 mb-4"/>
+        <footer class="text-center text-sm text-gray-500">
+            Mellow © 2025 | Anonymous discussions, AI-enhanced.
+        </footer>
+    </div>
+</body>
+</html>

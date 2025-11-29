@@ -1,0 +1,43 @@
+<hr class="border-gray-700 my-6"/>
+<h3 class="text-xl font-semibold text-white mb-3">
+    Search Results for: "<span class="text-blue-400">{{ query }}</span>"
+</h3>
+
+{% if rag_error %}
+    <div class="p-3 bg-red-900 border border-red-700 text-red-200 rounded-md mb-4">
+        <strong>Error during search:</strong> {{ rag_error }}
+    </div>
+{% endif %}
+
+{% if rag_used_gemini and rag_answer and "I don't know" not in rag_answer %}
+    <div class="mb-4 p-4 bg-green-900 border border-green-700 rounded-lg">
+        <h4 class="font-bold text-green-300">🤖 AI-Generated Answer (based on posts):</h4>
+        <p class="text-green-100 whitespace-pre-wrap">{{ rag_answer }}</p>
+    </div>
+    <h4 class="text-lg font-semibold text-white mb-2">Related Posts (Semantic Search):</h4>
+{% elif rag_answer and "I don't know" in rag_answer %}
+    <div class="mb-4 p-3 bg-gray-700 border border-gray-600 rounded-lg">
+        <p class="text-slate-300">AI could not determine an answer from the posts. Showing most relevant posts:</p>
+    </div>
+    <h4 class="text-lg font-semibold text-white mb-2">Most Relevant Posts (Semantic Search):</h4>
+{% else %}
+    <h4 class="text-lg font-semibold text-white mb-2">Most Relevant Posts (Semantic Search):</h4>
+{% endif %}
+
+
+<div class="space-y-2">
+    {% if semantic_results %}
+        {% for post in semantic_results %}
+            <div class="p-3 bg-gray-800 border border-gray-700 rounded-md">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-blue-400">{{ post.title }}</span>
+                    <span class="text-xs text-gray-400">Relevance: {{ "%.3f"|format(post.score) }}</span>
+                </div>
+                <p class="text-sm text-gray-300 mt-1">{{ post.content_snippet }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-slate-400">No relevant posts found.</p>
+    {% endif %}
+</div>
+<hr class="border-gray-700 my-6"/>

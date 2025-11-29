@@ -1,0 +1,12 @@
+/* static/style.css */
+
+/* You can add any custom overrides here, but */
+/* main.py doesn't load this by default. */
+/* We are using Tailwind CDN for all styling. */
+
+/* For example, if you wanted a custom font: */
+/*
+body {
+    font-family: 'Inter', sans-serif;
+}
+*/

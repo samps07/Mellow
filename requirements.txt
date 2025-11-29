@@ -1,0 +1,10 @@
+streamlit
+psycopg2-binary
+python-dotenv
+google-generativeai
+transformers
+sentence-transformers
+torch
+numpy
+scikit-learn
+keybert

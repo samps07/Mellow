@@ -1,31 +1,30 @@
-# utils.py
 import os
 import base64
 import secrets
 import hmac
 import hashlib
-from dotenv import load_dotenv
-
-load_dotenv()
-
-SECRET_KEY_FILE = ".secret_key"
-ENV_SECRET = os.getenv("SECRET_KEY")
+import streamlit as st
 
 def get_secret_key() -> str:
-    if ENV_SECRET:
-        return ENV_SECRET
-    if os.path.exists(SECRET_KEY_FILE):
-        return open(SECRET_KEY_FILE, "r").read().strip()
-    k = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
-    open(SECRET_KEY_FILE, "w").write(k)
-    return k
+    # 1. Try Streamlit Secrets
+    if hasattr(st, "secrets") and "SECRET_KEY" in st.secrets:
+        return st.secrets["SECRET_KEY"]
+    
+    # 2. Try Env Var
+    if os.environ.get("SECRET_KEY"):
+        return os.environ["SECRET_KEY"]
+        
+    # 3. Fallback: Generate a temporary one for this session
+    # Note: If the app restarts, tokens generated with this will become invalid.
+    if "temp_secret_key" not in st.session_state:
+        st.session_state.temp_secret_key = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+    
+    return st.session_state.temp_secret_key
 
 SECRET_KEY = get_secret_key()
 
 def hmac_hash(token: str) -> str:
-    """HMAC-SHA256 of token using SECRET_KEY (store this in DB)."""
     return hmac.new(SECRET_KEY.encode(), token.encode(), hashlib.sha256).hexdigest()
 
 def generate_token() -> str:
-    """Generate a one-time token to show user (store only hashed)."""
     return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()

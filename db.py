@@ -15,9 +15,15 @@ def _connect():
         db_url = os.environ["DB_URL"]
     
     if not db_url:
-        raise ValueError("DB_URL not found in secrets or environment variables.")
+        raise ValueError("DB_URL not found. Please check your Streamlit Secrets.")
 
-    return psycopg2.connect(db_url)
+    try:
+        # Force SSL mode which Supabase requires
+        return psycopg2.connect(db_url, sslmode='require')
+    except psycopg2.Error as e:
+        # This will log the specific database error to the Streamlit logs
+        print(f"Database connection failed: {e}")
+        raise e
 
 def init_db():
     """Create tables in PostgreSQL if they don't exist."""

@@ -1,13 +1,24 @@
-# gemini.py
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 import logging
+import streamlit as st
 
+# Load .env for local development (won't do anything on cloud if file is missing)
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Setup Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# --- 1. GET API KEY ---
+API_KEY = None
+
+# Check Streamlit Secrets first (Cloud)
+if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+
+MODEL_NAME = "gemini-2.5-flash"
 
 IS_CONFIGURED = False
 model = None

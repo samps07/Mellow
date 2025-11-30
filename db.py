@@ -7,22 +7,28 @@ import streamlit as st
 
 # Function to get connection
 def _connect():
-    # Try getting URL from Streamlit secrets first, then environment variables
-    db_url = None
-    if hasattr(st, "secrets") and "DB_URL" in st.secrets:
-        db_url = st.secrets["DB_URL"]
-    elif "DB_URL" in os.environ:
-        db_url = os.environ["DB_URL"]
-    
-    if not db_url:
-        raise ValueError("DB_URL not found. Please check your Streamlit Secrets.")
-
     try:
-        # Force SSL mode which Supabase requires
-        return psycopg2.connect(db_url, sslmode='require')
-    except psycopg2.Error as e:
-        # This will log the specific database error to the Streamlit logs
-        print(f"Database connection failed: {e}")
+        # Check if secrets are loaded
+        if not hasattr(st, "secrets") or "postgres" not in st.secrets:
+            st.error("❌ Missing 'postgres' section in Streamlit Secrets.")
+            raise ValueError("Missing secrets")
+
+        # Connect using individual parameters (No URL encoding needed!)
+        return psycopg2.connect(
+            host=st.secrets["postgres"]["host"],
+            database=st.secrets["postgres"]["dbname"],
+            user=st.secrets["postgres"]["user"],
+            password=st.secrets["postgres"]["password"],
+            port=st.secrets["postgres"]["port"],
+            sslmode='require',
+            connect_timeout=10,
+            prepare_threshold=None # Critical for Supabase Transaction Pooler
+        )
+    except Exception as e:
+        # This forces the REAL error to show up on your screen
+        st.error(f"💥 Database Connection Failed: {e}")
+        # Print to logs as well
+        print(f"Database Error: {e}")
         raise e
 
 def init_db():

@@ -293,7 +293,7 @@ if submitted_search and query and query.strip():
         # Handle cases where RAG failed or didn't find an answer
         elif rag_error:
              logging.error(f"RAG ask function failed: {rag_error}")
-             st.warning("Could not generate an answer due to an error. Showing relevant posts instead.")
+             st.warning(f"Could not generate an answer due to an error:{rag_error}. Showing relevant posts instead.")
         elif not rag_used_gemini and rag.GEMINI_API_KEY: # Only show if key exists but RAG didn't run (e.g., client init failed)
              st.info("AI answer generation unavailable. Showing relevant posts.")
         elif "I don't know" in (rag_answer or ""):

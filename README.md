@@ -7,7 +7,7 @@
 
 **Mellow** is a privacy-focused discussion platform that leverages modern AI to enhance user interactions while maintaining complete anonymity. It features AI-powered grammar correction, semantic search, and automatic content moderation.
 
-🔗 **Live Demo:** [Click here to visit Mellow]([(https://mellow-app.streamlit.app/)])
+🔗 **Live Demo:** [Click here to visit Mellow](https://mellow-app.streamlit.app/)
 
 ---
 

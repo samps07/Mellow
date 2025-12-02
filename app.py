@@ -162,6 +162,11 @@ if st.session_state.show_post_form:
                     try:
                         # Call the grammar correction function from rag.py
                         fixed_text = rag.fix_grammar(final_post_text)
+                        
+                        # --- FIX: ASSIGN THE CORRECTED TEXT BACK TO final_post_text ---
+                        if fixed_text:
+                            final_post_text = fixed_text
+                            
                     except Exception as gemini_e:
                         # Log error but don't prevent posting if Geminify fails
                         logging.error(f"Geminify failed during post creation: {gemini_e}", exc_info=True)

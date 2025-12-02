@@ -73,13 +73,7 @@ def fix_grammar(text: str) -> str:
 
     # Improved prompt to prevent "Here is the corrected text:" chatter
     prompt = (
-        "System: You are a strict copy editor. \n"
-        "Task: Correct all spelling, grammar, and punctuation mistakes in the user text below.\n"
-        "Constraints: \n"
-        "1. Do NOT change the meaning, tone, or style.\n"
-        "2. Output ONLY the corrected text. No intros, no outros, no markdown quotes.\n"
-        "3. If the text is already correct, output it exactly as is.\n\n"
-        f"User Text:\n{text}"
+        f"correct the grammar. do not change tone or actual meaning. return only the corrected text. Text:{text}"
     )
     
     try:
@@ -88,7 +82,7 @@ def fix_grammar(text: str) -> str:
         # Check if the text actually changed (ignoring case)
         if corrected.strip() and corrected.strip().lower() != text.strip().lower():
             _logging.info("Geminify applied corrections.")
-            st.toast("✨ Grammar fixed by Gemini!", icon="✨") # Visual Feedback
+            st.toast("Grammar fixed by Gemini!", icon="✨") # Visual Feedback
             return corrected.strip()
         else:
             _logging.info("Geminify no change.")

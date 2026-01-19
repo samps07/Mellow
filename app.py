@@ -254,7 +254,6 @@ if st.session_state.show_delete_form:
 
 # ---------- Search Form ----------
 # Always display the search form, slightly separated
-st.markdown("---")
 with st.form("search_form"):
     # Input field for search query
     query = st.text_input("Search Posts", key="search_input", placeholder="Search posts by keyword or topic...", label_visibility="collapsed")
